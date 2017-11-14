@@ -1,18 +1,19 @@
 CC = g++
-LDFLAGS = -std=c++11
+CCFLAGS = -std=c++11
+INCLUDE = -I include/
 
-all: targ
+all: main.out
 
-tabuleiro.o: tabuleiro.cpp
-	$(CC) $(LDFLAGS) -c tabuleiro.cpp
+game.o: src/game.cpp include/game.hpp
+	$(CC) $(CCFLAGS) $(INCLUDE) -c $<
 
-main.o: main.cpp
-	$(CC) $(LDFLAGS) -c main.cpp
+main.o: src/main.cpp include/game.hpp
+	$(CC) $(CCFLAGS) $(INCLUDE) -c $<
 
-targ: main.o tabuleiro.o
-	$(CC) $(LDFLAGS) main.o tabuleiro.o -o main
+main.out: main.o game.o
+	$(CC) $(CCFLAGS) $(LDFLAGS) $^ -o $@
 
 clean:
 	rm main.o
-	rm tabuleiro.o
-	rm main
+	rm game.o
+	rm main.out
