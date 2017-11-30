@@ -3,30 +3,73 @@ from __future__ import division
 from __future__ import print_function
 
 import numpy as np
+import itertools
 
 
 class Game:
-    def __init__(self, rows, cols, n_bombs, seed=None):
-        self.rows = rows
-        self.cols = cols
-        self.n_bombs = n_bombs
-        _bombs = np.zeros([rows + 2, cols + 2], dtype=np.uint8)
-        self._board = np.zeros([rows + 2, cols + 2], dtype=np.int16)
-        np.random.seed(seed)
+  game_over = False
+  victory = False
 
-        # sorteia "n_bombs" posicoes para se colocar bombas
-        x = np.arange(1, rows + 1, dtype=np.uint8)
-        y = np.arange(1, cols + 1, dtype=np.uint8)
-        pos = np.transpose([np.repeat(x, y.shape[0]), np.tile(y, x.shape[0])])
-        np.random.shuffle(pos)
-        x = pos[:n_bombs, 0]
-        y = pos[:n_bombs, 1]
-        _bombs[x, y] = 1
+  def __init__(self, rows, cols, n_bombs, seed=None):
+    # atributos do jogo
+    self._rows = rows
+    self._cols = cols
+    self._n_bombs = n_bombs
 
-        # calcula quantidade bombas adjacentes a cada celula
-        for i in range(1, rows + 1):
-            for j in range(1, cols + 1):
-                self._board[i, j] = np.sum(_bombs[i - 1:i + 2, j - 1:j + 2])
+    # tabuleiros internos e visivel
+    bombs = np.zeros([rows + 2, cols + 2], dtype=np.uint8)
+    self._board = np.zeros(bombs.shape, dtype=np.int8)
+    self.board = -np.ones(bombs.shape, dtype=np.int8)
 
-        # unifica tabuleiros
-        self._board[_bombs == 1] = -1
+    # sorteia com base na semente da entrada
+    np.random.seed(seed)
+
+    # sorteia "n_bombs" posicoes para se colocar bombas
+    y = np.arange(1, rows + 1, dtype=np.uint8)
+    x = np.arange(1, cols + 1, dtype=np.uint8)
+    pos = np.transpose([np.repeat(x, rows), np.tile(y, cols)])
+    np.random.shuffle(pos)
+    y = pos[:self._n_bombs, 0]
+    x = pos[:self._n_bombs, 1]
+    bombs[y, x] = 1
+
+    # calcula quantidade bombas adjacentes a cada celula
+    for i in range(self._rows):
+      for j in range(self._cols):
+        self._board[i + 1, j + 1] = np.sum(bombs[i:i + 3, j:j + 3])
+
+    # unifica tabuleiros internos
+    self._board[bombs == 1] = -1
+
+    # corta ultima linha e coluna
+    self._board = self._board[:rows + 1, :cols + 1]
+    self.board = self.board[:rows + 1, :cols + 1]
+
+    # facilita visualizacao
+    self.board[0] = np.arange(self.board.shape[0])
+    self.board[:, 0] = np.arange(self.board.shape[0])
+
+  def click(self, i, j):
+    # se clicou em bomba, fim de jogo
+    if self._board[i, j] == -1:
+      self.game_over = True
+      return
+
+    # ignorar cliques em celulas ja clicadas
+    if self.board[i, j] != -1:
+      return
+
+    # abre celulas
+    ngh = list(itertools.product((-1, 0, 1), (-1, 0, 1)))
+    q = [(i, j)]
+    for i, j in q:
+      # abre celula atual
+      self.board[i, j] = self._board[i, j]
+
+      # se celula atual nao possui bombas adjacentes, abra os vizinhos
+      if self.board[i, j] == 0:
+        for di, dj in ngh:
+          if 0 < i + di <= self._rows and \
+              0 < j + dj < self._cols and \
+              self.board[i + di, j + dj] == -1:
+            q.append((i + di, j + dj))
