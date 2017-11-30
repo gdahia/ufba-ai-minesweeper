@@ -70,6 +70,6 @@ class Game:
       if self.board[i, j] == 0:
         for di, dj in ngh:
           if 0 < i + di <= self._rows and \
-              0 < j + dj < self._cols and \
+              0 < j + dj <= self._cols and \
               self.board[i + di, j + dj] == -1:
             q.append((i + di, j + dj))
