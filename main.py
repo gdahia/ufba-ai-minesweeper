@@ -25,6 +25,9 @@ def main():
     if g.game_over:
       print('PERDEU')
       break
+    if g.victory:
+      print('VENCEU')
+      break
     print(g.board)
 
 

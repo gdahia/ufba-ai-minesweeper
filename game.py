@@ -15,6 +15,7 @@ class Game:
     self._rows = rows
     self._cols = cols
     self._n_bombs = n_bombs
+    self._n_invisible_cells = rows * cols
 
     # tabuleiros internos e visivel
     bombs = np.zeros([rows + 2, cols + 2], dtype=np.uint8)
@@ -64,8 +65,9 @@ class Game:
     q = [(i, j)]
     for i, j in q:
       # abre celula atual
+      if self._board[i, j] != self.board[i, j]:
+        self._n_invisible_cells = self._n_invisible_cells - 1
       self.board[i, j] = self._board[i, j]
-
       # se celula atual nao possui bombas adjacentes, abra os vizinhos
       if self.board[i, j] == 0:
         for di, dj in ngh:
@@ -73,3 +75,5 @@ class Game:
               0 < j + dj <= self._cols and \
               self.board[i + di, j + dj] == -1:
             q.append((i + di, j + dj))
+    if self._n_invisible_cells == self._n_bombs:
+      self.victory = True
