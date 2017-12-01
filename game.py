@@ -60,20 +60,27 @@ class Game:
     if self.board[i, j] != -1:
       return
 
-    # abre celulas
+    # abre celula atual
+    self._n_invisible_cells -= 1
+    self.board[i, j] = self._board[i, j]
+
+    # expande celula atual
     ngh = list(itertools.product((-1, 0, 1), (-1, 0, 1)))
     q = [(i, j)]
     for i, j in q:
-      # abre celula atual
-      if self._board[i, j] != self.board[i, j]:
-        self._n_invisible_cells = self._n_invisible_cells - 1
-      self.board[i, j] = self._board[i, j]
-      # se celula atual nao possui bombas adjacentes, abra os vizinhos
+      # se celula nao possui bombas adjacentes, abre celulas vizinhas
       if self.board[i, j] == 0:
         for di, dj in ngh:
           if 0 < i + di <= self._rows and \
               0 < j + dj <= self._cols and \
               self.board[i + di, j + dj] == -1:
+            # abre celula vizinha
+            self._n_invisible_cells -= 1
+            self.board[i + di, j + dj] = self._board[i + di, j + dj]
+
+            # celula vizinha sera expandida
             q.append((i + di, j + dj))
+
+    # checa se jogo foi vencido nesse movimento
     if self._n_invisible_cells == self._n_bombs:
       self.victory = True
