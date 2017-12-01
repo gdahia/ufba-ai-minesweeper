@@ -4,6 +4,7 @@ from __future__ import print_function
 
 import sys
 
+import players
 import game
 
 
@@ -17,19 +18,18 @@ def main():
   n_bombs = read_int('bombas: ')
 
   g = game.Game(rows, cols, n_bombs)
-  print(g.board)
+  p = players.player.Player(players.user)
 
-  for line in sys.stdin:
-    row, col = [int(x) for x in line.split()]
+  # simula jogo
+  while not (g.game_over or g.victory):
+    row, col = p.make_move(g.board)
     g.click(row, col)
-    if g.game_over:
-      print('PERDEU')
-      break
-    if g.victory:
-      print('VENCEU')
-      break
-    print(g.board)
 
+  # checa como jogo terminou
+  if g.victory:
+    print('VENCEU')
+  else:
+    print('PERDEU')
 
 if __name__ == "__main__":
   main()
