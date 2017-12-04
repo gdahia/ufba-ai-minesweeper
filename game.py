@@ -57,7 +57,7 @@ class Game:
       return
 
     # ignorar cliques em celulas ja clicadas
-    if self.board[i, j] != -1:
+    if self.board[i, j] > -1:
       return
 
     # abre celula atual
@@ -84,3 +84,11 @@ class Game:
     # checa se jogo foi vencido nesse movimento
     if self._n_invisible_cells == self._n_bombs:
       self.victory = True
+      
+  def flag(self, i, j):
+    # so permite marcar celulas fechadas
+    if self.board[i, j] == -1:
+      self.board[i, j] = -2
+    # so permite desmarcar celulas marcadas
+    elif self.board[i, j] == -2:
+      self.board[i, j] = -1

@@ -22,8 +22,11 @@ def main():
 
   # simula jogo
   while not (g.game_over or g.victory):
-    row, col = p.make_move(g.board)
-    g.click(row, col)
+    type_of_move, row, col = p.make_move(g.board)
+    if type_of_move == 'C':
+    	g.click(row, col)
+    elif type_of_move == 'F':
+    	g.flag(row, col)
 
   # checa como jogo terminou
   if g.victory:
