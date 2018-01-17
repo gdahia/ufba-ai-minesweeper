@@ -84,7 +84,7 @@ class Game:
     # checa se jogo foi vencido nesse movimento
     if self._n_invisible_cells == self._n_bombs:
       self.victory = True
-      
+
   def flag(self, i, j):
     # so permite marcar celulas fechadas
     if self.board[i, j] == -1:
