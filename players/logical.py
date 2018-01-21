@@ -6,10 +6,9 @@ import numpy as np
 
 
 class LogicalPlayer:
-  _no_move_strategy = None
-  _sure_moves = []
-
   def __init__(self, no_move_strategy=None):
+    self._sure_moves = []
+
     if no_move_strategy is not None:
       self._no_move_strategy = no_move_strategy
     else:

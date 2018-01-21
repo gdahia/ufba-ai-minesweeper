@@ -7,10 +7,11 @@ import itertools
 
 
 class Game:
-  game_over = False
-  victory = False
-
   def __init__(self, rows, cols, n_bombs, seed=None):
+    # inicializa status do jogo
+    self.game_over = False
+    self.victory = False
+
     # atributos do jogo
     self._rows = rows
     self._cols = cols
