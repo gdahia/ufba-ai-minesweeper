@@ -3,6 +3,7 @@ from __future__ import division
 from __future__ import print_function
 
 import argparse
+import sys
 
 import players
 import game
@@ -12,15 +13,24 @@ def read_int(msg=''):
   return int(input(msg))
 
 
-def main(rows, cols, n_bombs, seed):
+def main(player_type, rows, cols, n_bombs, seed):
   # se algum dos argumentos nao foi passado, tomar interativamente
   if rows is None or cols is None or n_bombs is None:
     rows = read_int('linhas: ')
     cols = read_int('colunas: ')
     n_bombs = read_int('bombas: ')
 
+  p = None
+  if player_type == 'user':
+    p = players.player.Player(players.user)
+  elif player_type == 'logical':
+    logical_player = players.logical.LogicalPlayer()
+    p = players.player.Player(logical_player)
+  else:
+    print('Tipo de jogador especificado não implementado.')
+    sys.exit(1)
+
   g = game.Game(rows, cols, n_bombs, seed)
-  p = players.player.Player(players.user)
 
   # simula jogo
   while not (g.game_over or g.victory):
@@ -44,6 +54,7 @@ if __name__ == "__main__":
   parser.add_argument('--cols', type=int, help='Número de colunas do campo.')
   parser.add_argument('--n_bombs', type=int, help='Número de bombas no campo.')
   parser.add_argument('--seed', type=str, help='Semente aleatoria.')
+  parser.add_argument('--player_type', type=str, help='Tipo de jogador.')
   FLAGS, _ = parser.parse_known_args()
 
-  main(FLAGS.rows, FLAGS.cols, FLAGS.n_bombs, FLAGS.seed)
+  main(FLAGS.player_type, FLAGS.rows, FLAGS.cols, FLAGS.n_bombs, FLAGS.seed)

@@ -4,9 +4,10 @@ from __future__ import print_function
 
 
 class Player:
+
   def __init__(self, player):
     player.init()
     self.strategy = player.strategy
-  
+
   def make_move(self, board):
     return self.strategy(board)

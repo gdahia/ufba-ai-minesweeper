@@ -16,7 +16,7 @@ class LogicalPlayer:
     else:
       self._no_move_strategy = self._random_coherent_move
 
-  def init():
+  def init(self):
     pass
 
   def strategy(self, board):
@@ -55,7 +55,7 @@ class LogicalPlayer:
     current_moves = np.ones(len(border_list), dtype=np.bool)
 
     # copia o tabuleiro para fazer computacoes
-    safe_board = np.zeros(board, dtype=np.uint8)
+    safe_board = np.zeros_like(board, dtype=np.uint8)
 
     # itera sobre possibilidades
     for possibility in range(2**len(border_list)):
@@ -70,18 +70,18 @@ class LogicalPlayer:
           safe_board[border_pos] = 0
 
       # checa se modelo gerado e possivel
-      if self._check_model_veracity(safe_board, insiders_list):
+      if self._check_model_veracity(board, safe_board, insiders_list):
         # itera sobre as posicoes de borda e salva movimentos determinados por 'possibility'
         for index, border_pos in enumerate(border_list):
           current_moves[index] |= not safe_board[border_pos]
 
-    return border_list[current_moves]
+    return list(border_list[current_moves])
 
   def _get_border_and_insiders(self, board):
     border = []
     insiders = []
-    for i, row in enumerate(1, board):
-      for j, pos in enumerate(1, row):
+    for i, row in enumerate(board[0:, 0:]):
+      for j, pos in enumerate(row):
         # checa se posicao esta fechada
         if pos != -1:
           # adiciona posicao aberta aos vizinhos da borda
@@ -90,7 +90,9 @@ class LogicalPlayer:
           # itera sobre vizinhanca de posicao fechada buscando posicoes abertas
           for di in range(-1, 2):
             for dj in range(-1, 2):
-              if board[i + di, j + dj] == -1:
+              if i + di < board.shape[0] and \
+                  j + dj < board.shape[1] and \
+                  board[i + di, j + dj] == -1:
                 border.append((i + di, j + dj))
 
     # remove elementos repetidos
