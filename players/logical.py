@@ -22,28 +22,28 @@ class LogicalPlayer:
   def strategy(self, board):
     # se ainda ha movimentos no buffer, executa o proximo desses movimentos
     if self._sure_moves:
-      move = self._sure_moves[0]
+      row, col = self._sure_moves[0]
       self._sure_moves = self._sure_moves[1:]
-      return move
+      return 'C', row, col
 
     # determina posicoes totalmente determinadas pelo campo ja preenchido
     self._sure_moves = self._get_sure_moves(board)
 
     # joga nas aberturas possiveis se existirem, usa estrategia predefinida para essa situacao, caso contrario
     if self._sure_moves:
-      move = self._sure_moves[0]
+      row, col = self._sure_moves[0]
       self._sure_moves = self._sure_moves[1:]
-      return move
+      return 'C', row, col
     else:
       return self._no_move_strategy(board)
 
   def _random_coherent_move(self, board):
     # determina celulas fechadas
-    closed_cels = np.where(board == -1)
+    closed_cells = np.transpose(np.where(board == -1))
 
     # sorteia uniformemente uma das celulas disponiveis
     move_index = np.random.choice(len(closed_cells), 1)
-    row, col = closed_cells[move_index]
+    row, col = closed_cells[move_index[0]]
 
     return 'C', row, col
 
@@ -52,7 +52,7 @@ class LogicalPlayer:
     border_list, insiders_list = self._get_border_and_insiders(board)
 
     # salva os movimentos de modelos que atendem o tabuleiro
-    current_moves = np.ones(len(border_list), dtype=np.bool)
+    current_moves = np.zeros(len(border_list), dtype=np.int64)
 
     # copia o tabuleiro para fazer computacoes
     safe_board = np.zeros_like(board, dtype=np.uint8)
@@ -64,40 +64,47 @@ class LogicalPlayer:
         # ve se 'possibility' preve bomba na posicao 'border_pos'
         has_bomb = bool(possibility & (1 << index))
 
+        # desempacota 'border_pos'
+        i, j = border_pos
+
         if has_bomb:
-          safe_board[border_pos] = 1
+          safe_board[i, j] = 1
         else:
-          safe_board[border_pos] = 0
+          safe_board[i, j] = 0
 
       # checa se modelo gerado e possivel
       if self._check_model_veracity(board, safe_board, insiders_list):
         # itera sobre as posicoes de borda e salva movimentos determinados por 'possibility'
         for index, border_pos in enumerate(border_list):
-          current_moves[index] |= not safe_board[border_pos]
+          # desempacota 'border_pos'
+          i, j = border_pos
 
-    return list(border_list[current_moves])
+          current_moves[index] += safe_board[i, j]
+
+    return list(border_list[current_moves == 0])
 
   def _get_border_and_insiders(self, board):
     border = []
     insiders = []
-    for i, row in enumerate(board[0:, 0:]):
+    for i, row in enumerate(board[1:, 1:]):
       for j, pos in enumerate(row):
-        # checa se posicao esta fechada
+        # checa se posicao esta aberta
         if pos != -1:
           # adiciona posicao aberta aos vizinhos da borda
-          insiders.append((i, j))
+          insiders.append((i + 1, j + 1))
 
           # itera sobre vizinhanca de posicao fechada buscando posicoes abertas
           for di in range(-1, 2):
             for dj in range(-1, 2):
-              if i + di < board.shape[0] and \
-                  j + dj < board.shape[1] and \
-                  board[i + di, j + dj] == -1:
-                border.append((i + di, j + dj))
+              if i + di + 1 < board.shape[0] and \
+                  j + dj + 1 < board.shape[1] and \
+                  board[i + di + 1, j + dj + 1] == -1:
+                border.append((i + di + 1, j + dj + 1))
 
     # remove elementos repetidos
     border = np.array(border, dtype=np.int32)
-    border = np.unique(border)
+    if border.size:
+      border = np.unique(border, axis=0)
 
     return border, insiders
 
