@@ -27,7 +27,7 @@ def main(player_type, rows, cols, n_bombs, seed):
     logical_player = players.logical.LogicalPlayer()
     p = players.player.Player(logical_player)
   else:
-    print('Tipo de jogador especificado não implementado.')
+    print('Tipo de jogador especificado nao implementado.')
     sys.exit(1)
 
   g = game.Game(rows, cols, n_bombs, seed)
@@ -50,9 +50,9 @@ def main(player_type, rows, cols, n_bombs, seed):
 if __name__ == "__main__":
   # parseia argumentos da linha de comando
   parser = argparse.ArgumentParser()
-  parser.add_argument('--rows', type=int, help='Número de linhas do campo.')
-  parser.add_argument('--cols', type=int, help='Número de colunas do campo.')
-  parser.add_argument('--n_bombs', type=int, help='Número de bombas no campo.')
+  parser.add_argument('--rows', type=int, help='Numero de linhas do campo.')
+  parser.add_argument('--cols', type=int, help='Numero de colunas do campo.')
+  parser.add_argument('--n_bombs', type=int, help='Numero de bombas no campo.')
   parser.add_argument('--seed', type=str, help='Semente aleatoria.')
   parser.add_argument('--player_type', type=str, help='Tipo de jogador.')
   FLAGS, _ = parser.parse_known_args()
