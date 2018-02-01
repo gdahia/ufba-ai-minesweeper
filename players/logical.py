@@ -6,6 +6,32 @@ from six.moves import range
 import numpy as np
 
 
+def model_counting_heuristic(board, current_moves, border_list):
+  # checa se existe borda
+  if len(current_moves):
+    # encontra posicao que em menos modelos apresenta bomba
+    least_bombed_pos = np.argmin(current_moves)
+
+    # desempacota movimento escolhido
+    row, col = border_list[least_bombed_pos]
+
+    return 'C', row, col
+  else:
+    # fallback para movimento aleatorio
+    return random_coherent_move(board, current_moves, border_list)
+
+
+def random_coherent_move(board, current_moves, border_list):
+  # determina celulas fechadas
+  closed_cells = np.transpose(np.where(board == -1))
+
+  # sorteia uniformemente uma das celulas disponiveis
+  move_index = np.random.choice(len(closed_cells), 1)
+  row, col = closed_cells[move_index[0]]
+
+  return 'C', row, col
+
+
 class LogicalPlayer:
 
   def __init__(self, no_move_strategy=None):
@@ -14,40 +40,37 @@ class LogicalPlayer:
     if no_move_strategy is not None:
       self._no_move_strategy = no_move_strategy
     else:
-      self._no_move_strategy = self._random_coherent_move
+      self._no_move_strategy = random_coherent_move
 
   def init(self):
     pass
 
   def strategy(self, board):
     # se ainda ha movimentos no buffer, executa o proximo desses movimentos
-    if self._sure_moves:
+    if len(self._sure_moves):
       row, col = self._sure_moves[0]
       self._sure_moves = self._sure_moves[1:]
       return 'C', row, col
 
+    # determina modelos possiveis no tabuleiro atual
+    current_moves, border_list = self._get_possible_board_models(board)
+
     # determina posicoes totalmente determinadas pelo campo ja preenchido
-    self._sure_moves = self._get_sure_moves(board)
+    self._sure_moves = self._get_sure_moves(current_moves, border_list)
 
     # joga nas aberturas possiveis se existirem, usa estrategia predefinida para essa situacao, caso contrario
-    if self._sure_moves:
+    if len(self._sure_moves):
       row, col = self._sure_moves[0]
       self._sure_moves = self._sure_moves[1:]
       return 'C', row, col
     else:
-      return self._no_move_strategy(board)
+      return self._no_move_strategy(board, current_moves, border_list)
 
-  def _random_coherent_move(self, board):
-    # determina celulas fechadas
-    closed_cells = np.transpose(np.where(board == -1))
+  def _get_sure_moves(self, current_moves, border_list):
+    # recupera movimentos que em todos os modelos sao seguros
+    return border_list[current_moves == 0]
 
-    # sorteia uniformemente uma das celulas disponiveis
-    move_index = np.random.choice(len(closed_cells), 1)
-    row, col = closed_cells[move_index[0]]
-
-    return 'C', row, col
-
-  def _get_sure_moves(self, board):
+  def _get_possible_board_models(self, board):
     # determina posicoes na borda
     border_list, insiders_list = self._get_border_and_insiders(board)
 
@@ -81,7 +104,7 @@ class LogicalPlayer:
 
           current_moves[index] += safe_board[i, j]
 
-    return list(border_list[current_moves == 0])
+    return current_moves, border_list
 
   def _get_border_and_insiders(self, board):
     border = []

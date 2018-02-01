@@ -13,18 +13,24 @@ def read_int(msg=''):
   return int(input(msg))
 
 
-def main(player_type, rows, cols, n_bombs, seed):
+def main(player_type, rows, cols, n_bombs, seed, heuristic):
   # se algum dos argumentos nao foi passado, tomar interativamente
   if rows is None or cols is None or n_bombs is None:
     rows = read_int('linhas: ')
     cols = read_int('colunas: ')
     n_bombs = read_int('bombas: ')
 
+  # define o tipo de jogador
   p = None
   if player_type == 'user':
     p = players.player.Player(players.user)
   elif player_type == 'logical':
-    logical_player = players.logical.LogicalPlayer()
+    # define a heuristica
+    no_move_strategy = None
+    if heuristic == 'model_counting':
+      no_move_strategy = players.logical.model_counting_heuristic
+
+    logical_player = players.logical.LogicalPlayer(no_move_strategy)
     p = players.player.Player(logical_player)
   else:
     print('Tipo de jogador especificado nao implementado.')
@@ -55,6 +61,9 @@ if __name__ == "__main__":
   parser.add_argument('--n_bombs', type=int, help='Numero de bombas no campo.')
   parser.add_argument('--seed', type=str, help='Semente aleatoria.')
   parser.add_argument('--player_type', type=str, help='Tipo de jogador.')
+  parser.add_argument(
+      '--heuristic', type=str, help='Heuristica a ser utilizada.')
   FLAGS, _ = parser.parse_known_args()
 
-  main(FLAGS.player_type, FLAGS.rows, FLAGS.cols, FLAGS.n_bombs, FLAGS.seed)
+  main(FLAGS.player_type, FLAGS.rows, FLAGS.cols, FLAGS.n_bombs, FLAGS.seed,
+       FLAGS.heuristic)
