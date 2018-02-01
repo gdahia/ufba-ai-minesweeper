@@ -104,7 +104,3 @@ class Game:
     # so permite marcar celulas fechadas
     if self.board[i, j] == -1:
       self._callback_handler(i, j, 'F')
-      self.board[i, j] = -2
-    # so permite desmarcar celulas marcadas
-    elif self.board[i, j] == -2:
-      self.board[i, j] = -1
