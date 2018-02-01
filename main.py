@@ -7,6 +7,26 @@ import sys
 
 import players
 import game
+import gui
+
+
+def simulate_game(rows, cols, n_bombs, seed, callback, player):
+  # instancia jogo
+  g = game.Game(rows, cols, n_bombs, seed, callback)
+
+  # simula jogo
+  while not (g.game_over or g.victory):
+    type_of_move, row, col = player.make_move(g.board)
+    if type_of_move == 'C':
+      g.click(row, col)
+    elif type_of_move == 'F':
+      g.flag(row, col)
+
+  # checa como jogo terminou
+  if g.victory:
+    print('VENCEU')
+  else:
+    print('PERDEU')
 
 
 def read_int(msg=''):
@@ -21,9 +41,9 @@ def main(player_type, rows, cols, n_bombs, seed, heuristic):
     n_bombs = read_int('bombas: ')
 
   # define o tipo de jogador
-  p = None
+  player = None
   if player_type == 'user':
-    p = players.player.Player(players.user)
+    player = players.player.Player(players.user)
   elif player_type == 'logical':
     # define a heuristica
     no_move_strategy = None
@@ -31,26 +51,16 @@ def main(player_type, rows, cols, n_bombs, seed, heuristic):
       no_move_strategy = players.logical.model_counting_heuristic
 
     logical_player = players.logical.LogicalPlayer(no_move_strategy)
-    p = players.player.Player(logical_player)
+    player = players.player.Player(logical_player)
   else:
     print('Tipo de jogador especificado nao implementado.')
     sys.exit(1)
 
-  g = game.Game(rows, cols, n_bombs, seed)
-
-  # simula jogo
-  while not (g.game_over or g.victory):
-    type_of_move, row, col = p.make_move(g.board)
-    if type_of_move == 'C':
-      g.click(row, col)
-    elif type_of_move == 'F':
-      g.flag(row, col)
-
-  # checa como jogo terminou
-  if g.victory:
-    print('VENCEU')
-  else:
-    print('PERDEU')
+  # chama interface grafica
+  gui.GUI.main(
+      rows, cols,
+      lambda callback: simulate_game(rows, cols, n_bombs, seed, callback, player)
+  )
 
 
 if __name__ == "__main__":

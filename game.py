@@ -8,7 +8,10 @@ import itertools
 
 class Game:
 
-  def __init__(self, rows, cols, n_bombs, seed=None):
+  def __init__(self, rows, cols, n_bombs, seed=None, callback=None):
+    # inicializa funcao de callback
+    self._callback = callback
+
     # inicializa status do jogo
     self.game_over = False
     self.victory = False
@@ -52,10 +55,18 @@ class Game:
     self.board[0] = np.arange(self.board.shape[0])
     self.board[:, 0] = np.arange(self.board.shape[0])
 
+  def _callback_handler(self, row, col, val):
+    if self._callback is not None:
+      self._callback(row=row, col=col, val=val)
+
   def click(self, i, j):
     # se clicou em bomba, fim de jogo
     if self._board[i, j] == -1:
       self.game_over = True
+
+      if self._callback is not None:
+        self._callback(row=i, col=j, val='*')
+
       return
 
     # ignorar cliques em celulas ja clicadas
@@ -65,6 +76,7 @@ class Game:
     # abre celula atual
     self._n_invisible_cells -= 1
     self.board[i, j] = self._board[i, j]
+    self._callback_handler(i, j, self._board[i, j])
 
     # expande celula atual
     ngh = list(itertools.product((-1, 0, 1), (-1, 0, 1)))
@@ -79,6 +91,7 @@ class Game:
             # abre celula vizinha
             self._n_invisible_cells -= 1
             self.board[i + di, j + dj] = self._board[i + di, j + dj]
+            self._callback_handler(i + di, j + dj, self._board[i + di, j + dj])
 
             # celula vizinha sera expandida
             q.append((i + di, j + dj))
@@ -90,6 +103,7 @@ class Game:
   def flag(self, i, j):
     # so permite marcar celulas fechadas
     if self.board[i, j] == -1:
+      self._callback_handler(i, j, 'F')
       self.board[i, j] = -2
     # so permite desmarcar celulas marcadas
     elif self.board[i, j] == -2:

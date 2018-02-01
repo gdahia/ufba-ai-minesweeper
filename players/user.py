@@ -7,8 +7,8 @@ def init():
   print('Type C #row #col to click on the cell (#row, #col)')
   print('Type F #row #col to mark cell (#row, #col) as a bomb')
 
+
 def strategy(board):
-  print(board)
   type_of_move, row, col = input().split()
   row = int(row)
   col = int(col)
