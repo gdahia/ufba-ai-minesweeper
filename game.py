@@ -7,6 +7,7 @@ import itertools
 
 
 class Game:
+
   def __init__(self, rows, cols, n_bombs, seed=None):
     # inicializa status do jogo
     self.game_over = False
@@ -18,7 +19,7 @@ class Game:
     self._n_bombs = n_bombs
     self._n_invisible_cells = rows * cols
 
-    # tabuleiros internos e visivel
+    # tabuleiros interno e visivel
     bombs = np.zeros([rows + 2, cols + 2], dtype=np.uint8)
     self._board = np.zeros(bombs.shape, dtype=np.int8)
     self.board = -np.ones(bombs.shape, dtype=np.int8)
