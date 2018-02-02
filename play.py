@@ -8,7 +8,6 @@ import sys
 import util
 import players
 import game
-import gui
 
 
 def simulate_game(rows, cols, n_bombs, seed, player, callback=None):
@@ -26,8 +25,10 @@ def simulate_game(rows, cols, n_bombs, seed, player, callback=None):
   # checa como jogo terminou
   if g.victory:
     print('VENCEU')
+    return True
   else:
     print('PERDEU')
+    return False
 
 
 def main(player_type, rows, cols, n_bombs, seed, heuristic, gui_mode):
@@ -55,12 +56,13 @@ def main(player_type, rows, cols, n_bombs, seed, heuristic, gui_mode):
 
   # checa se modo e de interface grafica
   if gui_mode:
+    import gui
     gui.GUI.main(
         rows, cols,
         lambda callback: simulate_game(rows, cols, n_bombs, seed, player, callback)
     )
   else:
-    simulate_game(rows, cols, n_bombs, seed, player)
+    return simulate_game(rows, cols, n_bombs, seed, player)
 
 
 if __name__ == "__main__":
@@ -70,7 +72,8 @@ if __name__ == "__main__":
   parser.add_argument('--cols', type=int, help='Numero de colunas do campo.')
   parser.add_argument('--n_bombs', type=int, help='Numero de bombas no campo.')
   parser.add_argument('--seed', type=str, help='Semente aleatoria.')
-  parser.add_argument('--player_type', type=str, help='Tipo de jogador.')
+  parser.add_argument(
+      '--player_type', required=True, type=str, help='Tipo de jogador.')
   parser.add_argument(
       '--heuristic', type=str, help='Heuristica a ser utilizada.')
   parser.add_argument(
