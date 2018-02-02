@@ -5,12 +5,13 @@ from __future__ import print_function
 import argparse
 import sys
 
+import util
 import players
 import game
 import gui
 
 
-def simulate_game(rows, cols, n_bombs, seed, callback, player):
+def simulate_game(rows, cols, n_bombs, seed, player, callback=None):
   # instancia jogo
   g = game.Game(rows, cols, n_bombs, seed, callback)
 
@@ -29,16 +30,12 @@ def simulate_game(rows, cols, n_bombs, seed, callback, player):
     print('PERDEU')
 
 
-def read_int(msg=''):
-  return int(input(msg))
-
-
-def main(player_type, rows, cols, n_bombs, seed, heuristic):
+def main(player_type, rows, cols, n_bombs, seed, heuristic, gui_mode):
   # se algum dos argumentos nao foi passado, tomar interativamente
   if rows is None or cols is None or n_bombs is None:
-    rows = read_int('linhas: ')
-    cols = read_int('colunas: ')
-    n_bombs = read_int('bombas: ')
+    rows = util.read_int('linhas: ')
+    cols = util.read_int('colunas: ')
+    n_bombs = util.read_int('bombas: ')
 
   # define o tipo de jogador
   player = None
@@ -56,11 +53,14 @@ def main(player_type, rows, cols, n_bombs, seed, heuristic):
     print('Tipo de jogador especificado nao implementado.')
     sys.exit(1)
 
-  # chama interface grafica
-  gui.GUI.main(
-      rows, cols,
-      lambda callback: simulate_game(rows, cols, n_bombs, seed, callback, player)
-  )
+  # checa se modo e de interface grafica
+  if gui_mode:
+    gui.GUI.main(
+        rows, cols,
+        lambda callback: simulate_game(rows, cols, n_bombs, seed, player, callback)
+    )
+  else:
+    simulate_game(rows, cols, n_bombs, seed, player)
 
 
 if __name__ == "__main__":
@@ -73,7 +73,12 @@ if __name__ == "__main__":
   parser.add_argument('--player_type', type=str, help='Tipo de jogador.')
   parser.add_argument(
       '--heuristic', type=str, help='Heuristica a ser utilizada.')
+  parser.add_argument(
+      '--gui',
+      type=util.str2bool,
+      default=True,
+      help='Habilita interface grafica')
   FLAGS, _ = parser.parse_known_args()
 
   main(FLAGS.player_type, FLAGS.rows, FLAGS.cols, FLAGS.n_bombs, FLAGS.seed,
-       FLAGS.heuristic)
+       FLAGS.heuristic, FLAGS.gui)
