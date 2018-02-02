@@ -75,10 +75,13 @@ def retrieve_data(folder_path, board_spec, n_mines, tl_spec):
 
       # checa se conforma com especificacao dada
       if board_spec == data['board'] and n_mines == data['n_mines'] and tl_spec == data['time_limit']:
+        # converte para porcentagem
+        total = data['wins'] + data['losses'] + data['tles']
+
         # converte dados
-        wins.append(data['wins'])
-        losses.append(data['losses'])
-        tles.append(data['tles'])
+        wins.append(100 * data['wins'] // total)
+        losses.append(100 * data['losses'] // total)
+        tles.append(100 * data['tles'] // total)
         labels.append(beautify(data['player_type'], data['heuristic']))
         n_samples += 1
 
