@@ -33,7 +33,6 @@ def random_coherent_move(board, current_moves, border_list):
 
 
 class LogicalPlayer:
-
   def __init__(self, no_move_strategy=None):
     self._sure_moves = []
 
