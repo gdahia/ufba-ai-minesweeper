@@ -52,12 +52,10 @@ class LogicalPlayer:
       return move
 
     # determina modelos possiveis no tabuleiro atual
-    current_moves, border_list, num_models = self._get_possible_board_models(
-        board)
+    current_moves, border_list = self._get_possible_board_models(board)
 
     # determina posicoes totalmente determinadas pelo campo ja preenchido
-    self._sure_moves = self._get_sure_moves(current_moves, border_list,
-                                            num_models)
+    self._sure_moves = self._get_sure_moves(current_moves, border_list)
 
     # joga nas aberturas possiveis se existirem, usa estrategia predefinida para essa situacao, caso contrario
     if len(self._sure_moves):
@@ -67,15 +65,13 @@ class LogicalPlayer:
     else:
       return self._no_move_strategy(board, current_moves, border_list)
 
-  def _get_sure_moves(self, current_moves, border_list, num_models):
+  def _get_sure_moves(self, current_moves, border_list):
     # recupera movimentos que em todos os modelos sao seguros
     sure_moves = []
     for i, current_move in enumerate(current_moves):
       row, col = border_list[i]
       if current_move == 0:
         sure_moves.append(('C', row, col))
-      elif current_move == num_models:
-        sure_moves.append(('F', row, col))
 
     return sure_moves
 
@@ -90,7 +86,6 @@ class LogicalPlayer:
     safe_board = np.zeros_like(board, dtype=np.uint8)
 
     # itera sobre possibilidades
-    num_models = 0
     for possibility in range(2**len(border_list)):
       # preenche a copia do tabuleiro de acordo com 'possibility'
       for index, border_pos in enumerate(border_list):
@@ -107,9 +102,6 @@ class LogicalPlayer:
 
       # checa se modelo gerado e possivel
       if self._check_model_veracity(board, safe_board, insiders_list):
-        # modelo valido encontrado
-        num_models += 1
-
         # itera sobre as posicoes de borda e salva movimentos determinados por 'possibility'
         for index, border_pos in enumerate(border_list):
           # desempacota 'border_pos'
@@ -117,7 +109,7 @@ class LogicalPlayer:
 
           current_moves[index] += safe_board[i, j]
 
-    return current_moves, border_list, num_models
+    return current_moves, border_list
 
   def _get_border_and_insiders(self, board):
     border = []
