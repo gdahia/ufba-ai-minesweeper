@@ -34,8 +34,10 @@ def plot(board_spec,
       format(board_spec[0], board_spec[1], n_mines, tl_spec))
   plt.xticks(indices, labels)
   plt.yticks(np.arange(111, step=10), np.arange(101, step=10))
-  plt.legend((p_wins[0], p_losses[0], p_tles[0]), ('Vitorias', 'Derrotas',
-                                                   'Tempo excedido'))
+  plt.legend(
+      (p_wins[0], p_losses[0], p_tles[0]), ('Vitorias', 'Derrotas',
+                                            'Tempo excedido'),
+      loc='upper left')
 
   if path is None:
     path = '.'
