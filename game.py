@@ -109,6 +109,6 @@ class Game:
     if self.board[i, j] == -1 and self._flag_board[i, j] == 0:
       self._callback_handler(i, j, 'F')
       self._flag_board[i, j] = 1
-    elif self._flag_board[i, j] == 1:
+    elif self.board[i,j] == -1 and self._flag_board[i, j] == 1:
       self._callback_handler(i, j, ' ')
       self._flag_board[i, j] = 0
