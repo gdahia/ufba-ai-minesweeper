@@ -35,6 +35,7 @@ def random_coherent_move(board, current_moves, border_list):
 class LogicalPlayer:
   def __init__(self, no_move_strategy=None):
     self._sure_moves = []
+    self._sure_mines = set()
 
     if no_move_strategy is not None:
       self._no_move_strategy = no_move_strategy
@@ -52,10 +53,10 @@ class LogicalPlayer:
       return move
 
     # determina modelos possiveis no tabuleiro atual
-    current_moves, border_list = self._get_possible_board_models(board)
+    current_moves, border_list, num_possible_models = self._get_possible_board_models(board)
 
     # determina posicoes totalmente determinadas pelo campo ja preenchido
-    self._sure_moves = self._get_sure_moves(current_moves, border_list)
+    self._sure_moves = self._get_sure_moves(current_moves, border_list, num_possible_models)
 
     # joga nas aberturas possiveis se existirem, usa estrategia predefinida para essa situacao, caso contrario
     if len(self._sure_moves):
@@ -65,13 +66,17 @@ class LogicalPlayer:
     else:
       return self._no_move_strategy(board, current_moves, border_list)
 
-  def _get_sure_moves(self, current_moves, border_list):
+  def _get_sure_moves(self, current_moves, border_list, num_possible_models):
     # recupera movimentos que em todos os modelos sao seguros
     sure_moves = []
     for i, current_move in enumerate(current_moves):
       row, col = border_list[i]
       if current_move == 0:
         sure_moves.append(('C', row, col))
+      elif current_move == num_possible_models:
+        if (row, col) not in self._sure_mines:
+          sure_moves.append(('F', row, col))
+          self._sure_mines.add((row, col))
 
     return sure_moves
 
@@ -86,6 +91,7 @@ class LogicalPlayer:
     safe_board = np.zeros_like(board, dtype=np.uint8)
 
     # itera sobre possibilidades
+    num_possible_models = 0
     for possibility in range(2**len(border_list)):
       # preenche a copia do tabuleiro de acordo com 'possibility'
       for index, border_pos in enumerate(border_list):
@@ -95,13 +101,15 @@ class LogicalPlayer:
         # desempacota 'border_pos'
         i, j = border_pos
 
-        if has_bomb:
+        if has_bomb or (i, j) in self._sure_mines:
           safe_board[i, j] = 1
         else:
           safe_board[i, j] = 0
 
+
       # checa se modelo gerado e possivel
       if self._check_model_veracity(board, safe_board, insiders_list):
+        num_possible_models += 1
         # itera sobre as posicoes de borda e salva movimentos determinados por 'possibility'
         for index, border_pos in enumerate(border_list):
           # desempacota 'border_pos'
@@ -109,7 +117,7 @@ class LogicalPlayer:
 
           current_moves[index] += safe_board[i, j]
 
-    return current_moves, border_list
+    return current_moves, border_list, num_possible_models
 
   def _get_border_and_insiders(self, board):
     border = []
