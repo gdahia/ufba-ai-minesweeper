@@ -27,6 +27,10 @@ class Game:
     self._board = np.zeros(bombs.shape, dtype=np.int8)
     self.board = -np.ones(bombs.shape, dtype=np.int8)
 
+    # posicoes marcadas com flag
+    flag = np.zeros([rows + 2, cols + 2], dtype=np.uint8)
+    self._flag_board = np.zeros(flag.shape, dtype=np.int8)
+
     # sorteia com base na semente da entrada
     np.random.seed(seed)
 
@@ -102,5 +106,9 @@ class Game:
 
   def flag(self, i, j):
     # so permite marcar celulas fechadas
-    if self.board[i, j] == -1:
+    if self.board[i, j] == -1 and self._flag_board[i, j] == 0:
       self._callback_handler(i, j, 'F')
+      self._flag_board[i, j] = 1
+    elif self._flag_board[i, j] == 1:
+      self._callback_handler(i, j, ' ')
+      self._flag_board[i, j] = 0
